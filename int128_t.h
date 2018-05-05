@@ -69,9 +69,9 @@ inline constexpr int128_t operator-(const int128_t l, const int128_t r)
 
 inline constexpr int128_t operator*(const int128_t l, const int128_t r)
 {
-	int128_t result{static_cast<int64_t>((l.low & 0xffffffff00000000 >> 32) * (r.low & 0xffffffff00000000 >> 32)), (l.low & 0xffffffff) * (r.low & 0xffffffff)};
+	int128_t result{static_cast<int64_t>(((l.low & 0xffffffff00000000) >> 32) * ((r.low & 0xffffffff00000000) >> 32)), (l.low & 0xffffffff) * (r.low & 0xffffffff)};
 	{
-		uint64_t m12 = (l.low & 0xffffffff) * (r.low & 0xffffffff00000000 >> 32);
+		uint64_t m12 = (l.low & 0xffffffff) * ((r.low & 0xffffffff00000000) >> 32);
 		{
 			uint64_t m12_l = (m12 & 0xffffffff) << 32;
 			if (result.low > std::numeric_limits<uint64_t>::max() - m12_l)
@@ -80,10 +80,10 @@ inline constexpr int128_t operator*(const int128_t l, const int128_t r)
 			}
 			result.low += m12_l;
 		}
-		result.high += static_cast<int64_t>((m12 & 0xffffffff00000000 >> 32));
+		result.high += static_cast<int64_t>(((m12 & 0xffffffff00000000) >> 32));
 	}
 	{
-		uint64_t m21 = (l.low & 0xffffffff00000000 >> 32) * (r.low & 0xffffffff);
+		uint64_t m21 = ((l.low & 0xffffffff00000000) >> 32) * (r.low & 0xffffffff);
 		{
 			uint64_t m21_l = (m21 & 0xffffffff) << 32;
 			if (result.low > std::numeric_limits<uint64_t>::max() - m21_l)
@@ -92,16 +92,16 @@ inline constexpr int128_t operator*(const int128_t l, const int128_t r)
 			}
 			result.low += m21_l;
 		}
-		result.high += static_cast<int64_t>((m21 & 0xffffffff00000000 >> 32));
+		result.high += static_cast<int64_t>(((m21 & 0xffffffff00000000) >> 32));
 	}
 	result.high +=
 		static_cast<int64_t>(
 			(l.low & 0xffffffff) * (static_cast<uint64_t>(r.high) & 0xffffffff) +
 			(static_cast<uint64_t>(l.high) & 0xffffffff) * (r.low & 0xffffffff) +
-			(((l.low & 0xffffffff) * (static_cast<uint64_t>(r.high) & 0xffffffff00000000 >> 32)) << 32) +
-			(((static_cast<uint64_t>(l.high) & 0xffffffff00000000 >> 32) * (r.low & 0xffffffff)) << 32) +
-			(((l.low & 0xffffffff00000000 >> 32) * (static_cast<uint64_t>(r.high) & 0xffffffff)) << 32) +
-			(((static_cast<uint64_t>(l.high) & 0xffffffff) * (r.low & 0xffffffff00000000 >> 32)) << 32));
+			(((l.low & 0xffffffff) * ((static_cast<uint64_t>(r.high) & 0xffffffff00000000) >> 32)) << 32) +
+			((((static_cast<uint64_t>(l.high) & 0xffffffff00000000) >> 32) * (r.low & 0xffffffff)) << 32) +
+			((((l.low & 0xffffffff00000000) >> 32) * (static_cast<uint64_t>(r.high) & 0xffffffff)) << 32) +
+			(((static_cast<uint64_t>(l.high) & 0xffffffff) * ((r.low & 0xffffffff00000000) >> 32)) << 32));
 
 	return result;
 }
