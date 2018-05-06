@@ -172,11 +172,11 @@ inline constexpr int128_t & operator++(int128_t & v)
 
 inline constexpr int128_t & operator--(int128_t & v)
 {
-	--v.low;
 	if (!v.low)
 	{
 		--v.high;
 	}
+	--v.low;
 	return v;
 }
 
