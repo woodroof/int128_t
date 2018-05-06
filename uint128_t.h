@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <limits>
 
 struct uint128_t final
 {
@@ -69,38 +68,41 @@ inline constexpr uint128_t operator-(const uint128_t l, const uint128_t r)
 
 inline constexpr uint128_t operator*(const uint128_t l, const uint128_t r)
 {
-	uint128_t result{((l.low & 0xffffffff00000000) >> 32) * ((r.low & 0xffffffff00000000) >> 32), (l.low & 0xffffffff) * (r.low & 0xffffffff)};
+	uint128_t result{(l.low >> 32) * (r.low >> 32), (l.low & 0xffffffff) * (r.low & 0xffffffff)};
 	{
-		uint64_t m12 = (l.low & 0xffffffff) * ((r.low & 0xffffffff00000000) >> 32);
+		const uint64_t m12 = (l.low & 0xffffffff) * (r.low >> 32);
 		{
-			uint64_t m12_l = (m12 & 0xffffffff) << 32;
-			if (result.low > std::numeric_limits<uint64_t>::max() - m12_l)
+			const uint64_t m12_l = (m12 & 0xffffffff) << 32;
+			const uint64_t old_low = result.low;
+			result.low += m12_l;
+			if (result.low < old_low)
 			{
 				++result.high;
 			}
-			result.low += m12_l;
+			result.high += (m12 >> 32);
+			
 		}
-		result.high += ((m12 & 0xffffffff00000000) >> 32);
 	}
 	{
-		uint64_t m21 = ((l.low & 0xffffffff00000000) >> 32) * (r.low & 0xffffffff);
+		const uint64_t m21 = (l.low >> 32) * (r.low & 0xffffffff);
 		{
-			uint64_t m21_l = (m21 & 0xffffffff) << 32;
-			if (result.low > std::numeric_limits<uint64_t>::max() - m21_l)
+			const uint64_t m21_l = (m21 & 0xffffffff) << 32;
+			const uint64_t old_low = result.low;
+			result.low += m21_l;
+			if (result.low < old_low)
 			{
 				++result.high;
 			}
-			result.low += m21_l;
+			result.high += (m21 >> 32);
 		}
-		result.high += ((m21 & 0xffffffff00000000) >> 32);
 	}
 	result.high +=
 		(l.low & 0xffffffff) * (r.high & 0xffffffff) +
 		(l.high & 0xffffffff) * (r.low & 0xffffffff) +
-		(((l.low & 0xffffffff) * ((r.high & 0xffffffff00000000) >> 32)) << 32) +
-		((((l.high & 0xffffffff00000000) >> 32) * (r.low & 0xffffffff)) << 32) +
-		((((l.low & 0xffffffff00000000) >> 32) * (r.high & 0xffffffff)) << 32) +
-		(((l.high & 0xffffffff) * ((r.low & 0xffffffff00000000) >> 32)) << 32);
+		(((l.low & 0xffffffff) * (r.high >> 32)) << 32) +
+		(((l.high >> 32) * (r.low & 0xffffffff)) << 32) +
+		(((l.low >> 32) * (r.high & 0xffffffff)) << 32) +
+		(((l.high & 0xffffffff) * (r.low >> 32)) << 32);
 
 	return result;
 }

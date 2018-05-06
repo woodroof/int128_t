@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include "int128_t.h"
 
 template<>
